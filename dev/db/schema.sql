@@ -15,11 +15,11 @@ CREATE TABLE role (
     id INT AUTO_INCREMENT NOT NULL,
     title VARCHAR(30) NOT NULL,
     salary DECIMAL NOT NULL,
-    department_id INT NOT NULL, 
+    department_id INT, 
     PRIMARY KEY (id),
     FOREIGN KEY (department_id)
         REFERENCES department (id)
-        ON DELETE CASCADE
+        ON DELETE SET NULL
 );
 
 DROP TABLE IF EXISTS employee;
@@ -35,5 +35,5 @@ CREATE TABLE employee (
         ON DELETE CASCADE,
     FOREIGN KEY (manager_id)
         REFERENCES employee (id)
-        ON DELETE CASCADE
+        ON DELETE SET NULL
 );
