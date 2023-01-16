@@ -1,11 +1,9 @@
 const inquirer = require("inquirer");
-const fs = require("fs");
 const mysql = require("mysql2");
 const cTable = require("console.table");
-const { listenerCount } = require("process");
-const Sequelize = require("sequelize");
 require("dotenv").config();
 
+// IMPORTS
 const db = mysql.createConnection(
   {
     host: "localhost",
@@ -20,16 +18,6 @@ const db = mysql.createConnection(
     `)
 );
 
-const sequelize = new Sequelize(
-  process.env.DB_NAME,
-  process.env.DB_USER,
-  process.env.DB_PASSWORD,
-  {
-    host: "localhost",
-    dialect: "mysql",
-    port: 3306,
-  }
-);
 
 const startBanner = `
 +-+ +-+ +-+ +-+ +-+ +-+ +-+ +-+   +-+ +-+ +-+
@@ -45,6 +33,8 @@ const baseq = () => {
         type: "list",
         message: `What would you like to do?`,
         name: "userOptions",
+        loop: false,
+        pageSize: 9,
         choices: [
           "Update Employee Managers",
           "View Employee managers",
@@ -53,6 +43,7 @@ const baseq = () => {
           "Delete Roles",
           "Delete Employee",
           "View Total Utilized Budget of Department",
+          "EXIT"
         ],
       },
     ])
@@ -71,6 +62,17 @@ const baseq = () => {
         case "Delete Department":
           deleteDepartment();
           break;
+        case "Delete Roles":
+          deleteRole();
+          break;
+        case "Delete Employee":
+          deleteEmployee();
+          break;
+        case "View Total Utilized Budget of Department":
+          viewTotalBudgetDepart();
+          break;
+        default:
+          bye();
       }
     });
 };
@@ -105,7 +107,7 @@ INNER JOIN department ON role.department_id = department.id;
 //gets all employees from the employee table
 const getAllEmployees = ` SELECT * FROM EMPLOYEE; `;
 
-//Why is this necessary? Avoid errors?
+//it fixes the async issue
 const getAllEmployeesFunc = () => {
   return db.promise().query(getAllEmployees);
 };
@@ -113,7 +115,7 @@ const getAllEmployeesFunc = () => {
 //gets all the departments in the department table
 const getAllDepartment = `SELECT * FROM department;`;
 
-//Why is this necessary? Avoid errors?
+//it fixes the async issue
 const getAllDepartmentFunc = () => {
   return db.promise().query(getAllDepartment);
 };
@@ -162,6 +164,20 @@ const updateEmployeeManager = () => {
   });
 };
 
+const getAllDepartmentSHOW = () => {
+  db.query(getAllDepartment, (err, res) => {
+    if (err) {
+      throw err;
+    }
+    console.log(`
+    
+    Department's Table
+    `);
+    console.table(res);
+    baseq();
+  });
+};
+
 const deleteDepartment = () => {
   getAllDepartmentFunc().then(([res]) => {
     const employeeChoice = res.map(({ id, name }) => ({
@@ -178,11 +194,135 @@ const deleteDepartment = () => {
         },
       ])
       .then((data) => {
-        const deleteDepartment = `SELECT id WHERE name = ${data.departmentOptions}`;
-        db.promise().query(deleteDepartment);
-        getAllDepartment();
+        const deleteDepartmentTemp = `SELECT name FROM department WHERE id = ${data.departmentOptions}`;
+        db.promise().query(deleteDepartmentTemp);
+
+        console.log(`
+        
+        Department was removed!!
+        `);
+        getAllDepartmentSHOW();
       });
   });
 };
+
+//gets the title from the role table
+const getAllRoles = `SELECT * FROM role`;
+
+// ?
+const getAllRolesFunc = () => {
+  return db.promise().query(getAllRoles);
+};
+
+const getAllRolesSHOW = () => {
+  db.query(getAllRoles, (err, res) => {
+    if (err) {
+      throw err;
+    }
+    console.log(`
+    
+    Role's Table
+    `);
+    console.table(res);
+    baseq();
+  });
+};
+
+// Function that relates to the deleteRole Case
+const deleteRole = () => {
+  getAllRolesFunc().then(([res]) => {
+    const employeeChoice = res.map(({ id, title }) => ({
+      name: `${title}`,
+      value: id,
+    }));
+    inquirer
+      .prompt([
+        {
+          type: "list",
+          message: `Which Role would you want to delete?`,
+          name: "roleOptions",
+          choices: employeeChoice,
+        },
+      ])
+      .then((data) => {
+        const deleteRoleTemp = `SELECT title FROM role WHERE id = ${data.roleOptions}`;
+        db.promise().query(deleteRoleTemp);
+        console.log(employeeChoice);
+        console.log(`
+            
+            Role was removed!!
+            `);
+        getAllRolesSHOW();
+      });
+  });
+};
+
+const getAllEmployeesSHOW = () => {
+  db.query(getAllEmployees, (err, res) => {
+    if (err) {
+      throw err;
+    }
+    console.log(`
+      
+      Employee's Table
+      `);
+    console.table(res);
+    baseq();
+  });
+};
+
+// Function that relates to the deleteRole Case
+const deleteEmployee = () => {
+  getAllEmployeesFunc().then(([res]) => {
+    const employeeChoice = res.map(({ id, first_name, last_name }) => ({
+      name: `${first_name} ${last_name}`,
+      value: id,
+    }));
+    inquirer
+      .prompt([
+        {
+          type: "list",
+          message: `Which employee would you want to delete?`,
+          name: "employeeOptions",
+          choices: employeeChoice,
+        },
+      ])
+      .then((data) => {
+        const deleteEmployeeTemp = `SELECT * FROM employee WHERE id = ${data.employeeOptions}`;
+        db.promise().query(deleteEmployeeTemp);
+        console.log(`
+              
+              employee was removed!!
+              `);
+        getAllEmployeesSHOW();
+      });
+  });
+};
+
+const budgetByDepartQ = `
+  SELECT department.name AS "Department Name", SUM(salary) AS "Department's Budget" 
+  FROM department 
+  INNER JOIN role ON department.id = role.department_id 
+  GROUP BY department.name ORDER BY SUM(salary) ASC;
+  `;
+
+const viewTotalBudgetDepart = () => {
+  db.query(budgetByDepartQ, (err, res) => {
+    if (err) {
+      throw err;
+    }
+    console.log(`
+      
+      Total Utilized Budget of Department
+      `);
+    console.table(res);
+    baseq();
+  });
+};
+
+const bye = () => {
+    console.log('Thanks for using Inquirer SQL interface')
+    process.exit()
+}
 
 baseq();
