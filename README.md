@@ -5,8 +5,6 @@ This is a Content Management System that allow end-users to easily view and inte
 
 ![Screenshot](./assets/images/screenshot1.png)
 
-/Users/beto/Desktop/bootcamp/InquirerSQL/assets/videos/demo.webm
-
 ## Table of Contents
 - [Prerequisites](#prerequisites)
 - [Installation](#installation)
