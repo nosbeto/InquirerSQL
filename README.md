@@ -5,6 +5,9 @@ This is a Content Management System that allow end-users to easily view and inte
 
 ![Screenshot](./assets/images/screenshot1.png)
 
+[demo.webm](https://user-images.githubusercontent.com/114036566/212731034-3ca651f3-4fd5-4e11-9f39-1536b97a779e.webm)
+
+
 ## Table of Contents
 - [Prerequisites](#prerequisites)
 - [Installation](#installation)
