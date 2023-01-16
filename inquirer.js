@@ -194,7 +194,7 @@ const deleteDepartment = () => {
         },
       ])
       .then((data) => {
-        const deleteDepartmentTemp = `SELECT name FROM department WHERE id = ${data.departmentOptions}`;
+        const deleteDepartmentTemp = `DELETE FROM department WHERE id = ${data.departmentOptions}`;
         db.promise().query(deleteDepartmentTemp);
 
         console.log(`
@@ -245,7 +245,7 @@ const deleteRole = () => {
         },
       ])
       .then((data) => {
-        const deleteRoleTemp = `SELECT title FROM role WHERE id = ${data.roleOptions}`;
+        const deleteRoleTemp = `DELETE FROM role WHERE id = ${data.roleOptions}`;
         db.promise().query(deleteRoleTemp);
         console.log(employeeChoice);
         console.log(`
@@ -288,7 +288,7 @@ const deleteEmployee = () => {
         },
       ])
       .then((data) => {
-        const deleteEmployeeTemp = `SELECT * FROM employee WHERE id = ${data.employeeOptions}`;
+        const deleteEmployeeTemp = `DELETE FROM employee WHERE id = ${data.employeeOptions}`;
         db.promise().query(deleteEmployeeTemp);
         console.log(`
               
